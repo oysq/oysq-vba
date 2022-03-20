@@ -1,0 +1,69 @@
+Function 合并单元格(point As Range)
+    ' 定位起始列
+    Dim point_a As Integer
+    point_a = point.Cells.Column
+    ' 定位结束行
+    Dim point_b As Integer
+    point_b = Application.Cells(Rows.Count, point_a + 1).End(xlUp).Row
+    
+    ' 最终结果集
+    Dim resKeyArr() As Variant
+    Dim resValArr() As Variant
+    
+    ReDim resKeyArr(0)
+    ReDim resValArr(0)
+    
+    ' 过程值
+    Dim key As String
+    Dim valArr() As Variant
+    ReDim valArr(0)
+    Dim j As Integer
+    j = 0
+    For i = 1 To point_b
+        If (Application.Cells(i, point_a).value <> "") Then
+            ' 设值
+            Call setVal(resKeyArr, resValArr, key, valArr)
+            ' 重新初始化
+            key = Application.Cells(i, point_a).value
+            j = 0
+            ReDim valArr(j)
+            Erase valArr
+        End If
+        ReDim Preserve valArr(j)
+        valArr(j) = Application.Cells(i, point_a + 1).value
+        j = j + 1
+    Next
+    ' 最后一个不要漏了
+    Call setVal(resKeyArr, resValArr, key, valArr)
+    ' 返回
+    合并单元格 = getRes(resKeyArr, resValArr)
+End Function
+
+Sub setVal(resKeyArr As Variant, resValArr As Variant, key As String, valArr As Variant)
+    If key <> "" Then
+        If resKeyArr(0) = "" Then
+            resKeyArr(0) = key
+            resValArr(0) = Join(valArr, ",")
+        Else
+            Dim j As Integer
+            j = UBound(resKeyArr) + 1
+            ReDim Preserve resKeyArr(j)
+            ReDim Preserve resValArr(j)
+            resKeyArr(j) = key
+            resValArr(j) = Join(valArr, ",")
+        End If
+    End If
+End Sub
+
+Function getRes(resKeyArr As Variant, resValArr As Variant)
+
+    Dim resArr As Variant
+    ReDim resArr(UBound(resKeyArr), 1)
+    
+    For i = 0 To UBound(resKeyArr)
+        resArr(i, 0) = resKeyArr(i)
+        resArr(i, 1) = resValArr(i)
+    Next
+    
+    getRes = resArr
+End Function
